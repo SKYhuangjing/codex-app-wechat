@@ -1,0 +1,50 @@
+{
+  "name": "codex-wechat",
+  "version": "0.2.1",
+  "description": "Weixin-first local bridge for Codex.",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/xjw2003/codex-p1.git"
+  },
+  "homepage": "https://github.com/xjw2003/codex-p1#readme",
+  "bugs": {
+    "url": "https://github.com/xjw2003/codex-p1/issues"
+  },
+  "type": "commonjs",
+  "main": "src/index.js",
+  "keywords": [
+    "codex",
+    "weixin",
+    "wechat",
+    "bot",
+    "cli",
+    "remote"
+  ],
+  "files": [
+    "bin",
+    "src",
+    "README.md",
+    ".env.example"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "bin": {
+    "codex-wechat": "./bin/codex-wechat.js"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "start": "node ./bin/codex-wechat.js start",
+    "login": "node ./bin/codex-wechat.js login",
+    "accounts": "node ./bin/codex-wechat.js accounts",
+    "check": "node --check ./src/index.js && node --check ./src/app/wechat-runtime.js && node --check ./src/infra/config/config.js && node --check ./src/infra/storage/session-store.js && node --check ./src/infra/codex/rpc-client.js && node --check ./src/infra/codex/message-utils.js && node --check ./src/infra/weixin/api.js && node --check ./src/infra/weixin/login.js && node --check ./src/infra/weixin/account-store.js && node --check ./src/infra/weixin/sync-buffer-store.js && node --check ./src/infra/weixin/message-utils.js && node --check ./src/infra/weixin/media-mime.js && node --check ./src/infra/weixin/media-send.js && node --check ./src/shared/command-parsing.js && node --check ./src/shared/workspace-paths.js && node --check ./src/shared/model-catalog.js && node --check ./src/shared/error-text.js"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.7",
+    "qrcode-terminal": "0.12.0",
+    "ws": "^8.19.0"
+  }
+}
