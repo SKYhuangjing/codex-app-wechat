@@ -461,7 +461,7 @@ function buildHelpCardText() {
     ],
     [
       "**绑定项目**",
-      "`/codex bind /绝对路径`",
+      "`/codex bind <绝对路径|项目相对路径>`",
       "把当前飞书会话绑定到一个本地项目。",
     ],
     [

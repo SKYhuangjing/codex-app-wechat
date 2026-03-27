@@ -30,6 +30,7 @@ const {
   isWorkspaceAllowed,
   normalizeWorkspacePath,
   pathMatchesWorkspaceRoot,
+  resolveWorkspaceCandidatesFromBindInput,
 } = require("../shared/workspace-paths");
 const {
   extractModelCatalogFromListResponse,
@@ -347,27 +348,52 @@ class WechatRuntime {
   async handleBindCommand(normalized) {
     const rawWorkspaceRoot = extractBindPath(normalized.text);
     if (!rawWorkspaceRoot) {
-      await this.sendReplyToNormalized(normalized, "用法: `/codex bind /绝对路径`");
+      await this.sendReplyToNormalized(normalized, "用法: `/codex bind <绝对路径|项目相对路径>`");
       return;
     }
 
-    const workspaceRoot = normalizeWorkspacePath(rawWorkspaceRoot);
-    if (!isAbsoluteWorkspacePath(workspaceRoot)) {
-      await this.sendReplyToNormalized(normalized, "只支持绝对路径绑定。");
+    const workspaceCandidates = resolveWorkspaceCandidatesFromBindInput(
+      rawWorkspaceRoot,
+      this.config.workspaceAllowlist
+    );
+    if (!workspaceCandidates.length) {
+      await this.sendReplyToNormalized(
+        normalized,
+        "只支持绝对路径，或白名单根目录下的相对项目路径。"
+      );
       return;
     }
+
+    const existingCandidates = [];
+    for (const candidatePath of workspaceCandidates) {
+      const stats = await this.resolveWorkspaceStats(candidatePath);
+      if (stats.exists && stats.isDirectory) {
+        existingCandidates.push(candidatePath);
+      }
+    }
+
+    if (!existingCandidates.length) {
+      await this.sendReplyToNormalized(
+        normalized,
+        `未找到匹配项目: ${rawWorkspaceRoot}`
+      );
+      return;
+    }
+
+    if (existingCandidates.length > 1) {
+      await this.sendReplyToNormalized(
+        normalized,
+        [
+          `匹配到多个项目，请改用更具体的路径: ${rawWorkspaceRoot}`,
+          ...existingCandidates.map((item) => `- ${item}`),
+        ].join("\n")
+      );
+      return;
+    }
+
+    const workspaceRoot = existingCandidates[0];
     if (!isWorkspaceAllowed(workspaceRoot, this.config.workspaceAllowlist)) {
       await this.sendReplyToNormalized(normalized, "该项目不在允许绑定的白名单中。");
-      return;
-    }
-
-    const workspaceStats = await this.resolveWorkspaceStats(workspaceRoot);
-    if (!workspaceStats.exists) {
-      await this.sendReplyToNormalized(normalized, `项目不存在: ${workspaceRoot}`);
-      return;
-    }
-    if (!workspaceStats.isDirectory) {
-      await this.sendReplyToNormalized(normalized, `路径非法: ${workspaceRoot}`);
       return;
     }
 
@@ -376,9 +402,18 @@ class WechatRuntime {
     this.sessionStore.setActiveWorkspaceRoot(bindingKey, workspaceRoot);
     await this.refreshWorkspaceThreads(bindingKey, workspaceRoot, normalized);
     const threadId = this.sessionStore.getThreadIdForWorkspace(bindingKey, workspaceRoot);
+    if (!threadId) {
+      this.sessionStore.setPendingNewThreadForWorkspace(bindingKey, workspaceRoot, true);
+    }
     const text = threadId
       ? `已切换到项目，并恢复原线程。\n\nworkspace: ${workspaceRoot}\nthread: ${threadId}`
-      : `已绑定项目。\n\nworkspace: ${workspaceRoot}`;
+      : [
+        "已绑定项目。",
+        "",
+        `workspace: ${workspaceRoot}`,
+        "当前项目还没有历史线程。",
+        "下一条普通消息会自动开始一个新线程。",
+      ].join("\n");
     await this.sendReplyToNormalized(normalized, text);
   }
 
@@ -386,10 +421,10 @@ class WechatRuntime {
     const workspaceContext = await this.resolveWorkspaceContext(normalized, false);
     if (!workspaceContext) {
       await this.sendReplyToNormalized(
-        normalized,
-        this.config.defaultWorkspaceRoot
-          ? `默认项目可用，但当前会话尚未持久化绑定。\n\nworkspace: ${normalizeWorkspacePath(this.config.defaultWorkspaceRoot)}`
-          : "当前会话还未绑定项目。先发送 `/codex bind /绝对路径`。"
+          normalized,
+          this.config.defaultWorkspaceRoot
+            ? `默认项目可用，但当前会话尚未持久化绑定。\n\nworkspace: ${normalizeWorkspacePath(this.config.defaultWorkspaceRoot)}`
+            : "当前会话还未绑定项目。先发送 `/codex bind <绝对路径|项目相对路径>`。"
       );
       return;
     }
@@ -797,7 +832,8 @@ class WechatRuntime {
   buildHelpText() {
     return [
       "可用命令：",
-      "/codex bind /绝对路径",
+      "/codex bind <绝对路径|项目相对路径>",
+      "例如: /codex bind agent",
       "/codex where",
       "/codex workspace",
       "/codex new",
@@ -836,7 +872,7 @@ class WechatRuntime {
       if (sendMissingMessage) {
         await this.sendReplyToNormalized(
           normalized,
-          "当前会话还未绑定项目。先发送 `/codex bind /绝对路径`，或配置 CODEX_WECHAT_DEFAULT_WORKSPACE。"
+          "当前会话还未绑定项目。先发送 `/codex bind <绝对路径|项目相对路径>`，或配置 CODEX_WECHAT_DEFAULT_WORKSPACE。"
         );
       }
       return null;

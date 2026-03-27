@@ -151,7 +151,7 @@ async function handleNewCommand(runtime, normalized) {
     await runtime.sendInfoCardMessage({
       chatId: normalized.chatId,
       replyToMessageId: normalized.messageId,
-      text: "当前会话还未绑定项目。先发送 `/codex bind /绝对路径`。",
+      text: "当前会话还未绑定项目。先发送 `/codex bind <绝对路径|项目相对路径>`。",
     });
     return;
   }
@@ -265,7 +265,7 @@ async function switchThreadById(runtime, normalized, threadId, { replyToMessageI
     await runtime.sendInfoCardMessage({
       chatId: normalized.chatId,
       replyToMessageId: replyTarget,
-      text: "当前会话还未绑定项目。先发送 `/codex bind /绝对路径`。",
+      text: "当前会话还未绑定项目。先发送 `/codex bind <绝对路径|项目相对路径>`。",
     });
     return;
   }

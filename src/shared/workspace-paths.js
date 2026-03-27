@@ -73,6 +73,45 @@ function isWorkspaceAllowed(workspaceRoot, allowlist) {
   });
 }
 
+function resolveWorkspaceCandidatesFromBindInput(rawInput, allowlist) {
+  const normalizedInput = normalizeWorkspacePath(rawInput);
+  if (!normalizedInput) {
+    return [];
+  }
+
+  if (isAbsoluteWorkspacePath(normalizedInput)) {
+    return [normalizedInput];
+  }
+
+  if (!Array.isArray(allowlist) || allowlist.length === 0) {
+    return [];
+  }
+
+  const candidates = [];
+  const seen = new Set();
+
+  for (const allowedRoot of allowlist) {
+    const normalizedAllowedRoot = normalizeWorkspacePath(allowedRoot);
+    if (!normalizedAllowedRoot || !isAbsoluteWorkspacePath(normalizedAllowedRoot)) {
+      continue;
+    }
+
+    const joinedCandidate = joinWorkspacePath(normalizedAllowedRoot, normalizedInput);
+    if (!joinedCandidate || !isWorkspaceAllowed(joinedCandidate, [normalizedAllowedRoot])) {
+      continue;
+    }
+
+    const comparable = normalizeComparableWorkspacePath(joinedCandidate);
+    if (seen.has(comparable)) {
+      continue;
+    }
+    seen.add(comparable);
+    candidates.push(joinedCandidate);
+  }
+
+  return candidates;
+}
+
 function filterThreadsByWorkspaceRoot(threads, workspaceRoot) {
   return threads.filter((thread) => pathMatchesWorkspaceRoot(thread.cwd, workspaceRoot));
 }
@@ -114,10 +153,33 @@ function workspacePathStartsWith(candidatePath, workspaceRoot) {
   return candidatePath.startsWith(`${workspaceRoot}/`);
 }
 
+function joinWorkspacePath(workspaceRoot, relativePath) {
+  const normalizedRoot = normalizeWorkspacePath(workspaceRoot);
+  const normalizedRelativePath = normalizeWorkspacePath(relativePath);
+  if (!normalizedRoot || !normalizedRelativePath) {
+    return "";
+  }
+
+  const pathLib = isWindowsStylePath(normalizedRoot) ? path.win32 : path.posix;
+  const resolved = pathLib.resolve(
+    convertWorkspacePathForNativeLib(normalizedRoot, pathLib),
+    convertWorkspacePathForNativeLib(normalizedRelativePath, pathLib)
+  );
+  return normalizeWorkspacePath(resolved);
+}
+
+function convertWorkspacePathForNativeLib(value, pathLib) {
+  if (pathLib === path.win32) {
+    return String(value || "").replace(/\//g, "\\");
+  }
+  return String(value || "");
+}
+
 module.exports = {
   filterThreadsByWorkspaceRoot,
   isAbsoluteWorkspacePath,
   isWorkspaceAllowed,
   normalizeWorkspacePath,
   pathMatchesWorkspaceRoot,
+  resolveWorkspaceCandidatesFromBindInput,
 };

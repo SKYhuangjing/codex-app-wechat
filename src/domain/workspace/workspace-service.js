@@ -5,6 +5,7 @@ const {
   isWorkspaceAllowed,
   normalizeWorkspacePath,
   pathMatchesWorkspaceRoot,
+  resolveWorkspaceCandidatesFromBindInput,
 } = require("../../shared/workspace-paths");
 const {
   extractBindPath,
@@ -53,20 +54,54 @@ async function handleBindCommand(runtime, normalized) {
     await runtime.sendInfoCardMessage({
       chatId: normalized.chatId,
       replyToMessageId: normalized.messageId,
-      text: "用法: `/codex bind /绝对路径`",
+      text: "用法: `/codex bind <绝对路径|项目相对路径>`",
     });
     return;
   }
 
-  const workspaceRoot = normalizeWorkspacePath(rawWorkspaceRoot);
-  if (!isAbsoluteWorkspacePath(workspaceRoot)) {
+  const workspaceCandidates = resolveWorkspaceCandidatesFromBindInput(
+    rawWorkspaceRoot,
+    runtime.config.workspaceAllowlist
+  );
+  if (!workspaceCandidates.length) {
     await runtime.sendInfoCardMessage({
       chatId: normalized.chatId,
       replyToMessageId: normalized.messageId,
-      text: "只支持绝对路径绑定。Windows 例如 `C:\\code\\repo`，macOS/Linux 例如 `/Users/name/repo`。",
+      text: "只支持绝对路径，或白名单根目录下的相对项目路径。",
     });
     return;
   }
+
+  const existingCandidates = [];
+  for (const candidatePath of workspaceCandidates) {
+    const workspaceStats = await runtime.resolveWorkspaceStats(candidatePath);
+    if (workspaceStats.exists && workspaceStats.isDirectory) {
+      existingCandidates.push(candidatePath);
+    }
+  }
+
+  if (!existingCandidates.length) {
+    await runtime.sendInfoCardMessage({
+      chatId: normalized.chatId,
+      replyToMessageId: normalized.messageId,
+      text: `未找到匹配项目: ${rawWorkspaceRoot}`,
+    });
+    return;
+  }
+
+  if (existingCandidates.length > 1) {
+    await runtime.sendInfoCardMessage({
+      chatId: normalized.chatId,
+      replyToMessageId: normalized.messageId,
+      text: [
+        `匹配到多个项目，请改用更具体的路径: ${rawWorkspaceRoot}`,
+        ...existingCandidates.map((item) => `- ${item}`),
+      ].join("\n"),
+    });
+    return;
+  }
+
+  const workspaceRoot = existingCandidates[0];
   if (!isWorkspaceAllowed(workspaceRoot, runtime.config.workspaceAllowlist)) {
     await runtime.sendInfoCardMessage({
       chatId: normalized.chatId,
@@ -76,34 +111,18 @@ async function handleBindCommand(runtime, normalized) {
     return;
   }
 
-  const workspaceStats = await runtime.resolveWorkspaceStats(workspaceRoot);
-  if (!workspaceStats.exists) {
-    await runtime.sendInfoCardMessage({
-      chatId: normalized.chatId,
-      replyToMessageId: normalized.messageId,
-      text: `项目不存在: ${workspaceRoot}`,
-    });
-    return;
-  }
-
-  if (!workspaceStats.isDirectory) {
-    await runtime.sendInfoCardMessage({
-      chatId: normalized.chatId,
-      replyToMessageId: normalized.messageId,
-      text: `路径非法: ${workspaceRoot}`,
-    });
-    return;
-  }
-
   applyDefaultCodexParamsOnBind(runtime, bindingKey, workspaceRoot);
   runtime.sessionStore.setActiveWorkspaceRoot(bindingKey, workspaceRoot);
   await runtime.refreshWorkspaceThreads(bindingKey, workspaceRoot, normalized);
   const existingThreadId = runtime.resolveThreadIdForBinding(bindingKey, workspaceRoot);
+  if (!existingThreadId) {
+    runtime.sessionStore.setPendingNewThreadForWorkspace(bindingKey, workspaceRoot, true);
+  }
   await showStatusPanel(runtime, normalized, {
     replyToMessageId: normalized.messageId,
     noticeText: existingThreadId
       ? "已切换到项目，并恢复原会话上下文。"
-      : "已绑定项目。",
+      : "已绑定项目。当前项目没有历史线程，下一条普通消息会自动开始新线程。",
   });
 }
 
@@ -591,7 +610,7 @@ async function handleWorkspacesCommand(runtime, normalized, { replyToMessageId }
     await runtime.sendInfoCardMessage({
       chatId: normalized.chatId,
       replyToMessageId: replyTarget,
-      text: "当前会话还没有已绑定项目。先发送 `/codex bind /绝对路径`。",
+      text: "当前会话还没有已绑定项目。先发送 `/codex bind <绝对路径|项目相对路径>`。",
     });
     return;
   }
@@ -612,7 +631,7 @@ async function showThreadPicker(runtime, normalized, { replyToMessageId } = {}) 
     await runtime.sendInfoCardMessage({
       chatId: normalized.chatId,
       replyToMessageId: replyTarget,
-      text: "当前会话还未绑定项目。先发送 `/codex bind /绝对路径`。",
+      text: "当前会话还未绑定项目。先发送 `/codex bind <绝对路径|项目相对路径>`。",
     });
     return;
   }
@@ -693,7 +712,7 @@ async function switchWorkspaceByPath(runtime, normalized, workspaceRoot, { reply
     await runtime.sendInfoCardMessage({
       chatId: normalized.chatId,
       replyToMessageId: replyToMessageId || normalized.messageId,
-      text: "该项目未绑定到当前会话，请先执行 `/codex bind /绝对路径`。",
+      text: "该项目未绑定到当前会话，请先执行 `/codex bind <绝对路径|项目相对路径>`。",
     });
     return;
   }
@@ -849,7 +868,7 @@ function validateDefaultCodexParamsConfig(runtime, modelsInput) {
 async function resolveCodexSettingWorkspaceContext(runtime, normalized) {
   return resolveWorkspaceContext(runtime, normalized, {
     replyToMessageId: normalized.messageId,
-    missingWorkspaceText: "当前会话还未绑定项目。先发送 `/codex bind /绝对路径`。",
+    missingWorkspaceText: "当前会话还未绑定项目。先发送 `/codex bind <绝对路径|项目相对路径>`。",
   });
 }
 

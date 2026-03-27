@@ -1,0 +1,48 @@
+{
+  "name": "codex-wechat",
+  "version": "0.2.1",
+  "description": "Local WeChat bridge plugin for CodexApp with setup guidance and marketplace metadata.",
+  "author": {
+    "name": "xjw2003",
+    "email": "[TODO: author@example.com]",
+    "url": "https://github.com/xjw2003"
+  },
+  "homepage": "https://github.com/xjw2003/codex-p2#readme",
+  "repository": "https://github.com/xjw2003/codex-p2",
+  "license": "MIT",
+  "keywords": [
+    "codex",
+    "wechat",
+    "weixin",
+    "bridge",
+    "local-plugin"
+  ],
+  "skills": "./skills/",
+  "hooks": "./hooks.json",
+  "mcpServers": "./.mcp.json",
+  "apps": "./.app.json",
+  "interface": {
+    "displayName": "Codex WeChat",
+    "shortDescription": "Use WeChat to drive a local Codex bridge.",
+    "longDescription": "Wraps the codex-wechat project as a local Codex plugin so you can install it from your local marketplace, configure the bridge, and run Codex conversations from WeChat.",
+    "developerName": "xjw2003",
+    "category": "Productivity",
+    "capabilities": [
+      "Interactive",
+      "Read",
+      "Local Bridge"
+    ],
+    "websiteURL": "https://github.com/xjw2003/codex-p2",
+    "privacyPolicyURL": "https://github.com/xjw2003/codex-p2",
+    "termsOfServiceURL": "https://github.com/xjw2003/codex-p2",
+    "defaultPrompt": [
+      "帮我配置 Codex 和微信桥接。",
+      "检查这个项目的微信桥接环境变量。",
+      "告诉我如何登录微信并启动 bridge。"
+    ],
+    "brandColor": "#07C160",
+    "composerIcon": "./assets/codex-wechat.svg",
+    "logo": "./assets/codex-wechat.svg",
+    "screenshots": []
+  }
+}

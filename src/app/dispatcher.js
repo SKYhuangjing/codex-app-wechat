@@ -32,7 +32,7 @@ async function onFeishuTextEvent(runtime, event) {
 
   const workspaceContext = await runtime.resolveWorkspaceContext(normalized, {
     replyToMessageId: normalized.messageId,
-    missingWorkspaceText: "当前会话还未绑定项目。先发送 `/codex bind /绝对路径`。",
+    missingWorkspaceText: "当前会话还未绑定项目。先发送 `/codex bind <绝对路径|项目相对路径>`。",
   });
   if (!workspaceContext) {
     return;

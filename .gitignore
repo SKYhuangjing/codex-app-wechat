@@ -43,6 +43,7 @@ dist/
 /.codex-schema/
 /.codex-im/
 /.codex-home/
+/.codex-wechat/
 /output/
 /scripts/
 
