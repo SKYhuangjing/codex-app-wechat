@@ -1,14 +1,14 @@
 {
   "name": "codex-wechat",
   "version": "0.2.1",
-  "description": "Local WeChat bridge plugin for CodexApp with setup guidance and marketplace metadata.",
+  "description": "Local WeChat bridge plugin for CodexApp, maintained in SKYhuangjing/codex-app-wechat.",
   "author": {
-    "name": "xjw2003",
-    "email": "[TODO: author@example.com]",
-    "url": "https://github.com/xjw2003"
+    "name": "SKYhuangjing",
+    "email": "sky_hj_lx@hotmail.com",
+    "url": "https://github.com/SKYhuangjing"
   },
-  "homepage": "https://github.com/xjw2003/codex-p2#readme",
-  "repository": "https://github.com/xjw2003/codex-p2",
+  "homepage": "https://github.com/SKYhuangjing/codex-app-wechat#readme",
+  "repository": "https://github.com/SKYhuangjing/codex-app-wechat",
   "license": "MIT",
   "keywords": [
     "codex",
@@ -23,18 +23,18 @@
   "apps": "./.app.json",
   "interface": {
     "displayName": "Codex WeChat",
-    "shortDescription": "Use WeChat to drive a local Codex bridge.",
-    "longDescription": "Wraps the codex-wechat project as a local Codex plugin so you can install it from your local marketplace, configure the bridge, and run Codex conversations from WeChat.",
-    "developerName": "xjw2003",
+    "shortDescription": "Use WeChat to drive your local Codex workspace.",
+    "longDescription": "Packages codex-wechat as a local Codex plugin so you can install it from your local marketplace, configure the bridge, switch projects, and run Codex conversations from WeChat.",
+    "developerName": "SKYhuangjing",
     "category": "Productivity",
     "capabilities": [
       "Interactive",
       "Read",
       "Local Bridge"
     ],
-    "websiteURL": "https://github.com/xjw2003/codex-p2",
-    "privacyPolicyURL": "https://github.com/xjw2003/codex-p2",
-    "termsOfServiceURL": "https://github.com/xjw2003/codex-p2",
+    "websiteURL": "https://github.com/SKYhuangjing/codex-app-wechat",
+    "privacyPolicyURL": "https://github.com/SKYhuangjing/codex-app-wechat",
+    "termsOfServiceURL": "https://github.com/SKYhuangjing/codex-app-wechat",
     "defaultPrompt": [
       "帮我配置 Codex 和微信桥接。",
       "检查这个项目的微信桥接环境变量。",

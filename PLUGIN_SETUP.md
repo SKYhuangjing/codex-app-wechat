@@ -1,6 +1,10 @@
 # Codex WeChat Plugin Setup
 
-This local plugin wraps the upstream `codex-wechat` bridge so CodexApp can discover it from your local marketplace.
+This local plugin packages `codex-wechat` for local Codex discovery and distribution.
+
+Repository:
+
+- [SKYhuangjing/codex-app-wechat](https://github.com/SKYhuangjing/codex-app-wechat)
 
 ## Files added for Codex plugin support
 
@@ -12,13 +16,33 @@ This local plugin wraps the upstream `codex-wechat` bridge so CodexApp can disco
 
 ## Local install path
 
-- Plugin root: `/Users/sky/plugins/codex-wechat`
-- Marketplace: `/Users/sky/.agents/plugins/marketplace.json`
+- Plugin root: your local `codex-wechat` clone directory
+- Marketplace: your local Codex marketplace config
+
+## Install from source into Codex
+
+The easiest option:
+
+- Ask Codex to install it directly from:
+  `https://github.com/SKYhuangjing/codex-app-wechat.git`
+
+If you prefer the official manual local marketplace flow:
+
+1. Copy the plugin folder into `~/.codex/plugins/codex-wechat`
+
+```bash
+mkdir -p ~/.codex/plugins
+cp -R /absolute/path/to/codex-wechat ~/.codex/plugins/codex-wechat
+```
+
+2. Create or update `~/.agents/plugins/marketplace.json` so `source.path` points to `./plugins/codex-wechat`
+
+3. Restart Codex and verify that the plugin appears
 
 ## First run
 
 ```bash
-cd /Users/sky/plugins/codex-wechat
+cd ~/.codex/plugins/codex-wechat
 npm install
 cp .env.example .env
 ```
@@ -29,11 +53,12 @@ Then edit `.env` and set at minimum:
 - `CODEX_WECHAT_DEFAULT_WORKSPACE`
 - `CODEX_WECHAT_WORKSPACE_ALLOWLIST`
 - `CODEX_WECHAT_CODEX_ENDPOINT`
+  or `CODEX_WECHAT_PROXY_CODEX_EXECUTABLE`
 
 Login and start:
 
 ```bash
-cd /Users/sky/plugins/codex-wechat
+cd ~/.codex/plugins/codex-wechat
 npm run login
 npm start
 ```
@@ -41,5 +66,5 @@ npm start
 ## Notes
 
 - This is a local bridge plugin, not a hosted WeChat connector.
-- If `CODEX_WECHAT_CODEX_ENDPOINT` is empty, the bridge will try to create a local endpoint proxy from VSCode Codex.
+- If `CODEX_WECHAT_CODEX_ENDPOINT` is empty, the bridge can create a local endpoint proxy from the `codex` binary bundled with `Codex.app`.
 - Keep the WeChat user allowlist tight before exposing any writable workspace.

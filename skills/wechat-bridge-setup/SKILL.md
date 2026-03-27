@@ -9,9 +9,13 @@ description: Configure, validate, and troubleshoot the local Codex-WeChat bridge
 
 This plugin packages the local `codex-wechat` Node.js bridge as a Codex plugin entry.
 
+Repository:
+
+- `https://github.com/SKYhuangjing/codex-app-wechat`
+
 The bridge path is:
 
-- `~/plugins/codex-wechat`
+- your local `codex-wechat` plugin directory
 
 It does not create a remote WeChat connector inside Codex. Instead, it installs a local plugin entry plus setup guidance for the existing Node bridge.
 
@@ -20,7 +24,7 @@ It does not create a remote WeChat connector inside Codex. Instead, it installs 
 1. Install dependencies in the plugin directory:
 
 ```bash
-cd ~/plugins/codex-wechat
+cd /path/to/codex-wechat
 npm install
 ```
 
@@ -30,25 +34,26 @@ npm install
 - `CODEX_WECHAT_DEFAULT_WORKSPACE`
 - `CODEX_WECHAT_WORKSPACE_ALLOWLIST`
 - `CODEX_WECHAT_CODEX_ENDPOINT`
+  or `CODEX_WECHAT_PROXY_CODEX_EXECUTABLE`
 
 3. Log in to WeChat:
 
 ```bash
-cd ~/plugins/codex-wechat
+cd /path/to/codex-wechat
 npm run login
 ```
 
 4. Start the bridge:
 
 ```bash
-cd ~/plugins/codex-wechat
+cd /path/to/codex-wechat
 npm start
 ```
 
 ## Endpoint notes
 
 - Preferred mode: set `CODEX_WECHAT_CODEX_ENDPOINT` to an existing Codex WebSocket endpoint.
-- Fallback mode: leave `CODEX_WECHAT_CODEX_ENDPOINT` empty and let the bridge try to create a local endpoint proxy from VSCode Codex.
+- Fallback mode: leave `CODEX_WECHAT_CODEX_ENDPOINT` empty and let the bridge create a local endpoint proxy from the `codex` binary bundled with `Codex.app`.
 
 ## Workspace and safety guidance
 

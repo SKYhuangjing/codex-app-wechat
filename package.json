@@ -1,15 +1,20 @@
 {
   "name": "codex-wechat",
   "version": "0.2.1",
-  "description": "Weixin-first local bridge for Codex.",
+  "description": "Local WeChat bridge for Codex, packaged as a Codex plugin.",
+  "author": {
+    "name": "SKYhuangjing",
+    "email": "sky_hj_lx@hotmail.com",
+    "url": "https://github.com/SKYhuangjing"
+  },
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/xjw2003/codex-p1.git"
+    "url": "git+https://github.com/SKYhuangjing/codex-app-wechat.git"
   },
-  "homepage": "https://github.com/xjw2003/codex-p1#readme",
+  "homepage": "https://github.com/SKYhuangjing/codex-app-wechat#readme",
   "bugs": {
-    "url": "https://github.com/xjw2003/codex-p1/issues"
+    "url": "https://github.com/SKYhuangjing/codex-app-wechat/issues"
   },
   "type": "commonjs",
   "main": "src/index.js",
@@ -25,6 +30,7 @@
     "bin",
     "src",
     "README.md",
+    "README_EN.md",
     ".env.example"
   ],
   "engines": {
