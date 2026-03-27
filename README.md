@@ -116,6 +116,35 @@ cp .env.example .env
 3. 执行 `npm start`
 4. 在微信里发送命令或普通文本消息
 
+## 随 Codex 自动连接
+
+Codex 当前本地插件规范里没有明确的 `onStart` / `autoActivate` 启动钩子，所以这里实现的是一个更接近用户体验的 macOS 方案：
+
+- 安装一个本地 `LaunchAgent`
+- 常驻一个轻量 monitor
+- 当它检测到 `Codex.app` 已启动但 bridge 还没启动时，自动拉起 `codex-wechat`
+
+启用方式：
+
+```bash
+cd ~/.codex/plugins/codex-wechat
+npm run autostart:install
+```
+
+关闭方式：
+
+```bash
+cd ~/.codex/plugins/codex-wechat
+npm run autostart:uninstall
+```
+
+说明：
+
+- 当前只支持 macOS
+- 这是“Codex 启动后自动连接”，不是修改 Codex 官方插件生命周期
+- monitor 日志在 `~/.codex-wechat/logs/autostart-monitor.log`
+- 自动拉起的 bridge 日志在 `~/.codex-wechat/logs/autostart-bridge.log`
+
 ## 推荐配置
 
 推荐优先使用 `Codex.app` 自带的 `codex` 可执行文件，让桥接和桌面 App 走同一版本：

@@ -116,6 +116,35 @@ Minimum startup flow:
 3. Run `npm start`
 4. Send commands or plain text messages in WeChat
 
+## Auto-Connect With Codex
+
+The current local Codex plugin format does not expose a clear `onStart` or `autoActivate` lifecycle hook, so this repository implements the closest macOS-native alternative:
+
+- install a local `LaunchAgent`
+- keep a lightweight monitor running
+- automatically start `codex-wechat` when `Codex.app` is detected and the bridge is not running yet
+
+Enable it with:
+
+```bash
+cd ~/.codex/plugins/codex-wechat
+npm run autostart:install
+```
+
+Disable it with:
+
+```bash
+cd ~/.codex/plugins/codex-wechat
+npm run autostart:uninstall
+```
+
+Notes:
+
+- macOS only for now
+- this auto-connect flow does not modify the official Codex plugin lifecycle
+- monitor logs are written to `~/.codex-wechat/logs/autostart-monitor.log`
+- bridge startup logs are written to `~/.codex-wechat/logs/autostart-bridge.log`
+
 ## Recommended Configuration
 
 Prefer using the `codex` executable bundled inside `Codex.app` so the bridge and the desktop app stay on the same version:

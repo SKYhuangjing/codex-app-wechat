@@ -63,6 +63,24 @@ npm run login
 npm start
 ```
 
+## Auto-connect on Codex startup
+
+There is no official plugin startup hook exposed here, so the plugin provides a macOS `LaunchAgent` based auto-connect mode instead.
+
+Enable:
+
+```bash
+cd ~/.codex/plugins/codex-wechat
+npm run autostart:install
+```
+
+Disable:
+
+```bash
+cd ~/.codex/plugins/codex-wechat
+npm run autostart:uninstall
+```
+
 ## Notes
 
 - This is a local bridge plugin, not a hosted WeChat connector.

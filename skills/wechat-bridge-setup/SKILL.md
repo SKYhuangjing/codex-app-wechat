@@ -50,6 +50,24 @@ cd /path/to/codex-wechat
 npm start
 ```
 
+## Auto-connect on Codex startup
+
+There is no official plugin startup hook exposed here, so the plugin provides a macOS `LaunchAgent` based auto-connect mode instead.
+
+Enable:
+
+```bash
+cd /path/to/codex-wechat
+npm run autostart:install
+```
+
+Disable:
+
+```bash
+cd /path/to/codex-wechat
+npm run autostart:uninstall
+```
+
 ## Endpoint notes
 
 - Preferred mode: set `CODEX_WECHAT_CODEX_ENDPOINT` to an existing Codex WebSocket endpoint.

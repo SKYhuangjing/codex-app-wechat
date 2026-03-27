@@ -45,7 +45,6 @@ dist/
 /.codex-home/
 /.codex-wechat/
 /output/
-/scripts/
 
 # IDE / editor files
 /.idea/
