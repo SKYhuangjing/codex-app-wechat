@@ -31,8 +31,7 @@ function buildQuotaInfoText(rateLimits) {
     "**当前 Codex 额度**",
     "",
     `套餐：${rateLimits.planType || "unknown"}`,
-    buildWindowLine("主额度窗口", rateLimits.primary),
-    buildWindowLine("次额度窗口", rateLimits.secondary),
+    ...buildQuotaStatusLines(rateLimits),
   ].filter(Boolean);
 
   if (rateLimits.credits) {
@@ -40,6 +39,17 @@ function buildQuotaInfoText(rateLimits) {
   }
 
   return lines.join("\n");
+}
+
+function buildQuotaStatusLines(rateLimits) {
+  if (!rateLimits) {
+    return ["额度：暂时还没有收到最新数据"];
+  }
+
+  return [
+    buildWindowLine(resolveWindowLabel(rateLimits.primary, "主额度窗口"), rateLimits.primary),
+    buildWindowLine(resolveWindowLabel(rateLimits.secondary, "次额度窗口"), rateLimits.secondary),
+  ].filter(Boolean);
 }
 
 function buildWindowLine(label, windowInfo) {
@@ -55,6 +65,20 @@ function buildWindowLine(label, windowInfo) {
     ? `${windowInfo.windowDurationMins} 分钟`
     : "unknown";
   return `${label}：已用 ${usedPercent}，剩余 ${remainingPercent}，窗口 ${durationText}，重置时间 ${resetAtText}`;
+}
+
+function resolveWindowLabel(windowInfo, fallbackLabel) {
+  const durationMins = Number(windowInfo?.windowDurationMins);
+  if (!Number.isFinite(durationMins) || durationMins <= 0) {
+    return fallbackLabel;
+  }
+  if (durationMins === 300) {
+    return "五小时窗口";
+  }
+  if (durationMins === 10080) {
+    return "周窗口";
+  }
+  return fallbackLabel;
 }
 
 function normalizeRateLimitsPayload(rateLimits) {
@@ -114,6 +138,7 @@ function normalizeText(value) {
 }
 
 module.exports = {
+  buildQuotaStatusLines,
   buildQuotaInfoText,
   handleQuotaCommand,
   updateLatestRateLimits,

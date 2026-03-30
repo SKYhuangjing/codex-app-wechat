@@ -39,7 +39,7 @@ const {
 } = require("../shared/model-catalog");
 const { formatFailureText } = require("../shared/error-text");
 const { buildAccountInfoText, readCurrentCodexAccountSummary } = require("../domain/account/account-service");
-const { buildQuotaInfoText, updateLatestRateLimits } = require("../domain/quota/quota-service");
+const { buildQuotaInfoText, buildQuotaStatusLines, updateLatestRateLimits } = require("../domain/quota/quota-service");
 const { buildQueriedInactivityStatusText, getInactivityStatus } = require("../domain/monitor/response-watchdog");
 
 const SESSION_EXPIRED_ERRCODE = -14;
@@ -77,13 +77,21 @@ class WechatRuntime {
     this.pendingChatContextByThreadId = new Map();
     this.activeTurnIdByThreadId = new Map();
     this.pendingApprovalByThreadId = new Map();
+    this.responseWatchByThreadId = new Map();
     this.currentRunKeyByThreadId = new Map();
     this.replyBufferByRunKey = new Map();
+    this.replyCardByRunKey = new Map();
+    this.fileChangeSummaryByRunKey = new Map();
+    this.replyFlushTimersByRunKey = new Map();
+    this.pendingReactionByBindingKey = new Map();
+    this.pendingReactionByThreadId = new Map();
     this.typingStopByThreadId = new Map();
     this.bindingKeyByThreadId = new Map();
     this.workspaceRootByThreadId = new Map();
     this.approvalAllowlistByWorkspaceRoot = new Map();
     this.latestRateLimits = null;
+    this.lastCodexEventAt = 0;
+    this.lastCodexEventMethod = "";
     this.resumedThreadIds = new Set();
     this.inFlightApprovalRequestKeys = new Set();
     this.codex.onMessage((message) => {
@@ -471,6 +479,7 @@ class WechatRuntime {
 
     const codexParams = this.getCodexParamsForWorkspace(bindingKey, workspaceRoot);
     const status = this.describeWorkspaceStatus(threadId);
+    const quotaLines = buildQuotaStatusLines(this.latestRateLimits);
     await this.sendReplyToNormalized(normalized, [
       `workspace: ${workspaceRoot}`,
       `thread: ${threadId || "(none)"}`,
@@ -478,6 +487,7 @@ class WechatRuntime {
       `model: ${codexParams.model || "(default)"}`,
       `effort: ${codexParams.effort || "(default)"}`,
       `threads: ${threads.length}`,
+      ...quotaLines,
     ].join("\n"));
   }
 

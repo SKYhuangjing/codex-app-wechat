@@ -1,3 +1,5 @@
+const { buildQuotaStatusLines } = require("../quota/quota-service");
+
 const DEFAULT_INACTIVITY_TIMEOUT_MS = 60 * 1000;
 const MAX_RESPONSE_WATCH_ENTRIES = 500;
 
@@ -267,6 +269,7 @@ function buildRuntimeStatusLines(runtime, threadId) {
   if (recentEventText) {
     lines.push(recentEventText);
   }
+  lines.push(...buildQuotaStatusLines(runtime.latestRateLimits));
   return lines;
 }
 

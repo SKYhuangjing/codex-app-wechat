@@ -22,6 +22,7 @@ const {
 } = require("../../shared/model-catalog");
 const codexMessageUtils = require("../../infra/codex/message-utils");
 const { formatFailureText } = require("../../shared/error-text");
+const { buildQuotaStatusLines } = require("../quota/quota-service");
 
 const MAX_FEISHU_UPLOAD_FILE_BYTES = 30 * 1024 * 1024;
 
@@ -181,6 +182,7 @@ async function sendStatusTextForThread(runtime, normalized, workspaceRoot, threa
 
   const status = runtime.describeWorkspaceStatus(threadId);
   const statusDetailLines = buildRuntimeStatusLines(runtime, threadId, status);
+  const quotaLines = buildQuotaStatusLines(runtime.latestRateLimits);
   await runtime.sendInfoCardMessage({
     chatId: normalized.chatId,
     replyToMessageId: normalized.messageId,
@@ -188,6 +190,7 @@ async function sendStatusTextForThread(runtime, normalized, workspaceRoot, threa
       `当前项目：\`${workspaceRoot}\``,
       `线程：\`${threadId}\``,
       ...statusDetailLines,
+      ...quotaLines,
       "当前没有检测到“无变化等待”监视中的任务。",
       "如需查看项目和线程面板，可发送 `/codex where`。",
     ].join("\n"),
